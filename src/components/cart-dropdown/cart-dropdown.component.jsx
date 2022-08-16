@@ -1,30 +1,35 @@
 import React, { useState, useRef, useEffect } from 'react';
 
-import { withRouter } from 'react-router-dom';
+import { useNavigate, withRouter } from 'react-router-dom';
 
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { selectCartItems, selectCartHidden, selectMenuActive } from '../../redux/cart/cart.selectors';
 import { toggleCartHidden, closeCartDropdown } from '../../redux/cart/cart.actions';
-import { useOnClickOutside } from '../../hooks';
+import { useOnClickOutside } from '../../hooks/useOnClickOutside';
 
 // import { CSSTransition } from 'react-transition-group';
 
 import CheckOut from '../checkout/checkout.component';
 import { CartDropdownContainer } from './cart-dropdown.styles';
+import { useCartSelector } from '../../hooks';
 
-const CartDropdown = ({ hidden, menuActive, closeCartDropdown, history, location }) => {
+const CartDropdown = () => {
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const hidden = useCartSelector(selectCartHidden);
+  const menuActive = useCartSelector(selectMenuActive);
   const node = useRef();
-  useOnClickOutside(node, () => closeCartDropdown());
+
+  useOnClickOutside(node, () => dispatch(closeCartDropdown()));
 
   const handleGoToCheckOut = () => {
-    closeCartDropdown();
-    history.push({ 
-      pathname: '/checkout', 
-      state: { from: location.pathname,
-               active: 'cart',
-               isMobile: false,
-              }})
+    dispatch(closeCartDropdown());
+    navigate('/checkout', 
+      { from: navigate.useMatch.active,
+        active: 'cart',
+        isMobile: false,
+      })
   }
 
   return (
@@ -39,16 +44,4 @@ const CartDropdown = ({ hidden, menuActive, closeCartDropdown, history, location
   )
 };
 
-const mapStateToProps = createStructuredSelector({
-  cartItems: selectCartItems,
-  hidden: selectCartHidden,
-  menuActive: selectMenuActive
-});
-
-const mapDispatchToProps = dispatch => ({
-  toggleCartHidden: () => dispatch(toggleCartHidden()),
-  closeCartDropdown: () => dispatch(closeCartDropdown())
-});
-
-
-export default withRouter((connect(mapStateToProps, mapDispatchToProps)(CartDropdown)));
+export default CartDropdown;

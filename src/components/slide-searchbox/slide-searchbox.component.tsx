@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, RefObject } from 'react';
 import useDebounce from '../../hooks/useDebounce';
 import { disableBodyScroll, enableBodyScroll, clearAllBodyScrollLocks } from 'body-scroll-lock';
 
-import { useSpring, config } from 'react-spring';
+import { useSpring, config } from '@react-spring/web';
 import { animated } from '@react-spring/web';
 
 import { Cover, SlideNavBar, SearchBoxContainer, SearchBox } from './slide-searchbox.styles.jsx';
@@ -14,10 +14,11 @@ import './slide-searchbox.styles';
 import { useAppDispatch, useCategoriesSelector, useCollectionsSelector } from '../../hooks';
 import { fetchQuery, selectIsFetchingQuery, selectQueryResults } from '../../redux/collections/collections.slice';
 import { selectCategoriesList } from '../../redux/categories/categories.slice';
+import { Collection } from '../../redux/collections/collections.types';
 
 interface SlideSearchBoxProps {
-  headerWidthLeft: string;
-  headerWidthRight: string;
+  headerWidthLeft: number;
+  headerWidthRight: number;
 }
 
 const SlideSearchBox = ({ headerWidthLeft, headerWidthRight }: SlideSearchBoxProps) => {
@@ -25,11 +26,11 @@ const SlideSearchBox = ({ headerWidthLeft, headerWidthRight }: SlideSearchBoxPro
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [debouncedQueryInput, setDebouncedQueryInput] = useDebouncedState<string>('');
   const dispatch = useAppDispatch();
-  const widthTarget = String(parseInt(headerWidthRight) - parseInt(headerWidthLeft) - 550);
-  const inputRef = useRef(null);
+  const widthTarget = String(headerWidthRight - headerWidthLeft - 550);
+  const inputRef = useRef<Element | HTMLElement | null>(null);
 
   const isLoading = useCollectionsSelector(selectIsFetchingQuery);
-  const queryResults = useCollectionsSelector(selectQueryResults);
+  const queryResults: Collection[] = useCollectionsSelector(selectQueryResults);
   const sections = useCategoriesSelector(selectCategoriesList);
 
   const toggleDrawer = (toggle: boolean) => (event: any) => {
@@ -91,11 +92,11 @@ const SlideSearchBox = ({ headerWidthLeft, headerWidthRight }: SlideSearchBoxPro
     // when search sidebar is open, set scroll on body off.
     if (drawerOpen) {
       setTimeout(() => setShowSearchInput(true), 500);
-      disableBodyScroll(inputRef);
+      inputRef && inputRef.current && disableBodyScroll(inputRef.current);
     }
     else {
       setShowSearchInput(false);
-      enableBodyScroll(inputRef);
+      inputRef && inputRef.current && enableBodyScroll(inputRef.current);
       setDebouncedQueryInput('');
     }
     // will unmount:
@@ -122,9 +123,11 @@ const SlideSearchBox = ({ headerWidthLeft, headerWidthRight }: SlideSearchBoxPro
         { queryResults && (queryResults.length > 0) &&
           <animated.div style={resultsAnimations} className='links-container'>
             <h2 className='title-searchbar'>Products</h2>
-            {queryResults.map(item => 
-              <CheckOutItem key={item._id} cartItem={item}/>
-              )}
+            {queryResults.map(items => 
+              items.products.map(item => (
+                <CheckOutItem key={item._id} cartItem={item}/>
+              ))
+            )}
           </animated.div>  
         }
         <animated.div style={textAnimations} className='links-container'>
@@ -140,7 +143,7 @@ const SlideSearchBox = ({ headerWidthLeft, headerWidthRight }: SlideSearchBoxPro
           <div className='link-searchbar'><p>whiskies</p></div>
         </animated.div>
         {queryResults && queryResults.length > 0
-          ? queryResults.map(i => i.categoryIds.map(category => <div>{category}</div>))
+          ? queryResults.map(i => <div>{i.category.title}</div>)
           : <></>
         }
       </SlideNavBar>

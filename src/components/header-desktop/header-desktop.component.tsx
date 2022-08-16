@@ -56,12 +56,12 @@ const HeaderDesktop = () => {
     config: !subMenuHidden ? { ...config.slow } : { ...config.stiff }
   });
 
-  const transitionSubnavbarItem = useTransition(submenuItem => submenuItem._id, {
-    from: { opacity: 0 },
-    enter: { opacity: 1 },
-    leave: { opacity: 0, transform: 'translateY(-300px)', display: 'none' },
-    config: submenuItems ? { ...config.stiff } : { ...config.stiff, duration: 100 }
-  });
+  // const transitionSubnavbarItem = useTransition(submenuItem._id, {
+  //   from: { opacity: 0 },
+  //   enter: { opacity: 1 },
+  //   leave: { opacity: 0, transform: 'translateY(-300px)', display: 'none' },
+  //   config: submenuItems ? { ...config.stiff } : { ...config.stiff, duration: 100 }
+  // });
 
   // START HIDE-FUNCTIONALITY HANDLER WHILE SCROLLING //
   const [state, setState] = useState({
@@ -158,9 +158,10 @@ const HeaderDesktop = () => {
           </OptionLink>
         </OptionsPanel>
       </OptionsContainerTop>
-      {transitionsDropdown.map(({ item, key, props }) =>
-        item && <animated.div key={key} style={props}><CartDropdown hidden={hidden} /></animated.div>
-      )}
+      {transitionsDropdown((style, item) => (
+          <animated.div style={style}><CartDropdown /></animated.div>
+        ))
+      }
       
       <OptionsContainer 
         onMouseEnter={() => isActive.category && setIsActive({ category: isActive.category })}
@@ -172,7 +173,7 @@ const HeaderDesktop = () => {
               key={`${category.id}${idx}`}
               onMouseEnter={() => {setIsActive({ category: category.slug })}}
               onMouseLeave={() => {setIsActive({ category: '' })}}
-              onClick={() => history.push(`/shop/${category.slug}`)}
+              onClick={() => navigate(`/shop/${category.slug}`)}
               styled={location.pathname === '/' ? null : 'styled'}
             >
               {category.title}
@@ -180,7 +181,7 @@ const HeaderDesktop = () => {
           )}
         </NavbarContainer>
       </OptionsContainer>
-      { transitionSubNavbar.map(
+      {/* { transitionSubNavbar.map(
         ({ item, key, props }) => (
           item && 
           <animated.div key={key} style={props}>
@@ -188,29 +189,25 @@ const HeaderDesktop = () => {
               onMouseEnter={() => setIsActive({ category: isActive.category })}
               onMouseLeave={() => setHideSubMenu(false)}
             >
-              <NavbarMenuContainer>
-                { transitionSubnavbarItem.map(
-                  ({ item, key, props }) => (
+              <NavbarMenuContainer> */}
+              
+              {/* { submenuItems.map(
+                  (item) => (
                     item &&
                       <animated.div key={key} style={props}>
                         <NavbarMenuItem
                           key={item._id}
                           type='item'
-                          onClick={() => history.push(`/shop/${isActive.category}/${item._id}`)}>
+                          onClick={() => navigate(`/shop/${isActive.category}/${item._id}`)}>
                           { item.name }
                         </NavbarMenuItem>
                       </animated.div>
                     )
                   )
-                }
-              </NavbarMenuContainer>
-            </OptionsContainer>
-          </animated.div>
-        )
-      )}
-      
+                } */}
+              
     </HeaderContainer>
   )
 };
 
-export default withRouter(HeaderDesktop);
+export default HeaderDesktop;

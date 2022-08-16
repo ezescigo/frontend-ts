@@ -5,7 +5,7 @@ import { Item } from "../../models";
 
 export interface CollectionsState {
     collections: Collection[],
-    query: Item[],
+    query: Collection[],
     isFetching: boolean;
     isFetchingQuery: boolean;
     isLoaded: boolean;

@@ -73,5 +73,5 @@ const mapStateToProps = (state, ownProps) =>
   wishlist: selectWishlistItems(state),
 });
 
-export default withRouter(connect(mapStateToProps)(CollectionPage));
+export default CollectionPage;
 

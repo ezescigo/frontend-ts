@@ -10,7 +10,7 @@ import { selectWishlistItemsCount } from '../../redux/wishlist/wishlist.selector
 import { toggleCartHidden } from '../../redux/cart/cart.actions';
 
 import { auth } from '../../firebase/firebase.utils';
-import { useOnClickOutside } from '../../hooks';
+import { useAppDispatch, useCartSelector, useCollectionsSelector, useOnClickOutside, useUserSelector, useWishlistSelector } from '../../hooks';
 import useDebounce from '../../hooks/useDebounce';
 
 import CartIcon from '../cart-icon/cart-icon.component';
@@ -24,9 +24,16 @@ import { IoPerson, IoPersonOutline } from 'react-icons/io5';
 
 import {useSpring, useTransition, animated, config} from 'react-spring';
 import { RiScalesLine } from 'react-icons/ri';
+import { selectIsXs } from '../../redux/app';
 
 
-const HeaderMobile = ({ hidden, isxsdevice, currentUser, sections, isLoading,  wishlistItemCount, toggleCartHidden, location }) => {
+const HeaderMobile = ({ sections, isLoading, location }) => {
+  const dispatch = useAppDispatch();
+  const isxsdevice = useAppSelector(selectIsXs);
+  const wishlistItemCount = useWishlistSelector(selectWishlistItemsCount);
+  const currentUser = useUserSelector(selectCurrentUser);
+  const isLoading = useCollectionsSelector(selectIsCollectionFetching);
+  const hidden = useCartSelector(selectCartHidden);
 
   const slide = useTransition(!hidden, null, {
     from: { opacity: 0, transform: "translateY(0px)", transform: "scale(0)" },
@@ -113,23 +120,11 @@ const HeaderMobile = ({ hidden, isxsdevice, currentUser, sections, isLoading,  w
                       }
               }}
            >
-          <CartIcon mobile={true} isXsDevice={isxsdevice} onClick={() => toggleCartHidden()} />
+          <CartIcon mobile={true} isXsDevice={isxsdevice} onClick={() => dispatch(toggleCartHidden())} />
         </OptionLink>
       </OptionsContainer>
     </HeaderContainer>
   )
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentUser: selectCurrentUser,
-  hidden: selectCartHidden,
-  collections: selectCollectionsForPreview,
-  isLoading: selectIsCollectionFetching,
-  wishlistItemCount: selectWishlistItemsCount
-});
-
-const mapDispatchToProps = dispatch => ({
-  toggleCartHidden: () => dispatch(toggleCartHidden())
-});
-
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(HeaderMobile));
+export default HeaderMobile;
